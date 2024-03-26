@@ -1,6 +1,4 @@
-# Performing the 
-
-
+# To understand the dataset in a much more clearer way , we have performed few exploratory data analysis.
 read.csv("C:/Users/ASUS/OneDrive/Desktop/OUR WORLD COVID 19 DATASET.csv", header=FALSE)
 dw <- read.csv("C:/Users/ASUS/OneDrive/Desktop/OUR WORLD COVID 19 DATASET.csv")
 dim(dw)                                                                  
