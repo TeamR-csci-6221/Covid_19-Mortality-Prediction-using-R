@@ -1,3 +1,6 @@
+# Performing the 
+
+
 read.csv("C:/Users/ASUS/OneDrive/Desktop/OUR WORLD COVID 19 DATASET.csv", header=FALSE)
 dw <- read.csv("C:/Users/ASUS/OneDrive/Desktop/OUR WORLD COVID 19 DATASET.csv")
 dim(dw)                                                                  
@@ -36,7 +39,7 @@ tail(china_cases)
 library(ggplot2)
 # Convert 'date' column to Date format
 dw$date <- as.Date(dw$date)
-
+options(scipen=999) 
 # Total cases per day line plot for the all location dw
 ggplot(dw, aes(x = date, y = total_cases)) +
   geom_line() +
