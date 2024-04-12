@@ -1,6 +1,3 @@
-# Load Dataset
-read.csv("C:/Users/ASUS/OneDrive/Desktop/OUR WORLD COVID 19 DATASET.csv", header=FALSE)
-
 # dw is the data frame in which we are storing our dataset
 dw <- read.csv("C:/Users/ASUS/OneDrive/Desktop/OUR WORLD COVID 19 DATASET.csv")
 
