@@ -189,18 +189,37 @@ dw$date <- as.Date(dw$date)
 
 # UI
 ui <- fluidPage(
-  titlePanel("COVID-19 Death Prediction"),
+  # Styling the title panel
+  tags$head(
+    tags$style(HTML("
+      .title-panel {
+        background-color: #3498db;
+        color: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+    "))
+  ),
+  
+  div(class = "title-panel",
+      titlePanel("COVID-19 Death Prediction")
+  ),  # Adding a class to the title panel
+  
   sidebarLayout(
     sidebarPanel(
       selectInput("country", "Select Country:", choices = unique(dw$location)),
       sliderInput("total_cases", "Select Total Cases:", min = 0, max = 1000000, value = 1000),
-      actionButton("predict_button", "Predict"),
+      actionButton("predict_button", "Predict", class = "btn-primary"),
       br(),
-      h5("Predicted Deaths:"),
-      textOutput("prediction"),
+      h5("Predicted Deaths:", style = "color: #2c3e50;"),
+      htmlOutput("prediction"),
       br(),
-      h5("Model Summary:"),
-      verbatimTextOutput("model_summary")
+      div(
+        verbatimTextOutput("model_summary"), 
+        class = "model-summary"
+      )
     ),
     mainPanel(
       tabsetPanel(
@@ -208,7 +227,30 @@ ui <- fluidPage(
         tabPanel("Time Series Plot", plotOutput("time_series_plot"))
       )
     )
-  )
+  ),
+  tags$style(HTML("
+    body {
+      background-color: #f0f3f5;
+    }
+    .btn-primary {
+      background-color: #3498db;
+      border-color: #3498db;
+    }
+    .btn-primary:hover {
+      background-color: #2980b9;
+      border-color: #2980b9;
+    }
+    .nav-tabs .nav-link {
+      color: #3498db;
+    }
+    .nav-tabs .nav-link.active {
+      background-color: #3498db;
+      color: #fff;
+    }
+    .model-summary {
+      color: #2980b9;
+    }
+  "))
 )
 
 # Server
