@@ -1,4 +1,4 @@
-# dw is the data frame in which we are storing our dataset
+# Load the dataset ,  dw is the data frame in which we are storing our dataset
 dw <- read.csv("C:/Users/ASUS/OneDrive/Desktop/OUR WORLD COVID 19 DATASET.csv")
 
 # used dim() to know the dimension of dataset
