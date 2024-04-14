@@ -694,6 +694,7 @@ server <- function(input, output) {
   output$time_series_plot <- renderPlot({
     filtered_data <- dw %>%
       filter(location == input$country) %>%
+      mutate(date = as.Date(date)) %>%  # Convert 'date' column to Date format
       group_by(date) %>%
       summarise(total_cases = sum(total_cases)) %>%
       na.omit()  # Remove NA values if any
