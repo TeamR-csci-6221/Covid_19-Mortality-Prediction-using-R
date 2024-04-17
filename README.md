@@ -32,8 +32,7 @@ Historical COVID-19 data is from Data on COVID-19 by Our World in Data, World He
   2.	Navigate to the project directory.
   3.	Install the necessary dependencies listed above.
   4.	Run the R script “main.R” with “owid-covid-data.csv” dataset as an input file.
-  5.	Explore the data model with the effect of vaccination over time, Pearson's Correlation Heatmap, and COVID-19 statistics to forecast mortality rates in   
-      different regions.
+  5.	Explore the data model with the effect of vaccination over time, Pearson's Correlation Heatmap, and COVID-19 statistics to forecast mortality rates in different regions.
   6.	Generate predictions using the trained models and interpret the results.
      
 #### Contributors
