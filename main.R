@@ -7,7 +7,7 @@ dw <- read.csv("/Users/dog/Documents/csci_6221/owid-covid-data.csv")
 plotting_data <- dw
 
 # used dim() to know the dimension of dataset
-dim(dw)
+dim(dw)  
 
 # used sapply() to get the class of each column
 sapply(dw, class)
@@ -173,7 +173,7 @@ unique_locations <- unique(plotting_data$location)
 metrics <- c("New Cases", "New Deaths", "Total Cases", "Total Deaths", "Vaccinated Per Hundred", "Fully Vaccinated Per Hundred", "Weekly Hospital_Admission Per Million", "Weekly ICU_Admission Per Million", "Positive Rate", "Total Test", "New Test", "Total Test Per Thousand","New Test Per Thousand")
 
 ui <- fluidPage(
-
+  
   # Styling the title panel
   tags$head(
     tags$style(
@@ -223,11 +223,11 @@ ui <- fluidPage(
       ")
     )
   ),
-
+  
   div(class = "title-panel",
       titlePanel("Covid-19 Analysis App", windowTitle = "R-Power - Empowering Data Analysis")
   ),
-
+  
   navbarPage("Team R",
              tabPanel("Country Comparator Tool",
                       sidebarLayout(
@@ -291,31 +291,31 @@ ui <- fluidPage(
 
 
 server <- function(input, output) {
-
+  
   locations <- reactiveValues(list = list("United States")) # Start with 1 default location
   locations2 <- reactiveValues(list = list("United States")) # Start with 1 default location
-
+  
   # Create a mapping from country names to ISO codes
   country_to_iso_df <- unique(plotting_data[, c("location", "iso_code")])
-
+  
   # Ensure the 'location' column is used to name elements in the 'ISO' column
   country_to_iso <- setNames(country_to_iso_df$iso_code, country_to_iso_df$location)
-
+  
   observeEvent(input$add_location, {
     # Temporarily store the current selections to update the list accurately
     current_selections <- sapply(1:length(locations$list), function(i) {
       input[[paste0("location", i)]]
     }, USE.NAMES = FALSE)
-
+    
     # Check if the UI has been rendered and selections made before adding
     if (length(current_selections) > 0) {
       locations$list <- current_selections
     }
-
+    
     # Add a new default location ("United States") to the list
     locations$list <- c(locations$list, "United States")
   })
-
+  
   output$location_ui <- renderUI({
     input_list <- lapply(1:length(locations$list), function(i) {
       # Check if it's the last location and there are more than one locations
@@ -339,22 +339,22 @@ server <- function(input, output) {
     })
     do.call(tagList, input_list)
   })
-
+  
   observeEvent(input$add_location_2, {
     # Temporarily store the current selections to update the list accurately
     current_selections <- sapply(1:length(locations2$list), function(i) {
-      input[[paste0("location", i)]]
+      input[[paste0("location2", i)]]
     }, USE.NAMES = FALSE)
-
+    
     # Check if the UI has been rendered and selections made before adding
     if (length(current_selections) > 0) {
       locations2$list <- current_selections
     }
-
+    
     # Add a new default location ("United States") to the list
     locations2$list <- c(locations2$list, "United States")
   })
-
+  
   output$location_ui_2 <- renderUI({
     input_list <- lapply(1:length(locations2$list), function(i) {
       # Check if it's the last location and there are more than one locations
@@ -362,7 +362,7 @@ server <- function(input, output) {
         # For the last location (if not the only location), include the "Remove" button
         fluidRow(
           column(10,
-                 selectInput(paste0("location", i), label = sprintf("Select Country %d", i),
+                 selectInput(paste0("location2", i), label = sprintf("Select Country %d", i),
                              choices = unique_locations, selected = locations2$list[[i]])),
           column(2,
                  actionButton(paste0("remove_location", i), label = "", icon = icon("minus")))
@@ -371,14 +371,14 @@ server <- function(input, output) {
         # For all other conditions, do not include the "Remove" button
         fluidRow(
           column(12,
-                 selectInput(paste0("location", i), label = sprintf("Select Country %d", i),
+                 selectInput(paste0("location2", i), label = sprintf("Select Country %d", i),
                              choices = unique_locations, selected = locations2$list[[i]]))
         )
       }
     })
     do.call(tagList, input_list)
   })
-
+  
   observe({
     lapply(1:length(locations$list), function(i) {
       observeEvent(input[[paste0("remove_location", i)]], {
@@ -387,7 +387,7 @@ server <- function(input, output) {
       })
     })
   })
-
+  
   observe({
     lapply(1:length(locations2$list), function(i) {
       observeEvent(input[[paste0("remove_location", i)]], {
@@ -396,34 +396,34 @@ server <- function(input, output) {
       })
     })
   })
-
+  
   observeEvent(input$submit_2, {
     selected_locations2 <- sapply(1:length(locations2$list), function(i) {
-      input[[paste0("location", i)]]
+      input[[paste0("location2", i)]]
     })
-
+    
     filtered_data <- plotting_data %>%
       select(location, date, total_vaccinations_per_hundred, new_deaths_smoothed_per_million, iso_code, positive_rate, population) %>%
       mutate(date = as.Date(date, format = "%Y-%m-%d")) %>%  # Ensure 'date' is a Date object, adjust format as necessary
       filter(location %in% selected_locations2,  # Filter for specific locations
              date >= as.Date("2021-02-01") & date <= as.Date("2022-07-01"))
-
+    
     # clean_data <- filtered_data %>%
     #   mutate(
     #     total_vaccinations_per_hundred = ifelse(is.na(total_vaccinations_per_hundred), median(total_vaccinations_per_hundred, na.rm = TRUE), total_vaccinations_per_hundred),
     #     new_deaths_smoothed_per_million = ifelse(is.na(new_deaths_smoothed_per_million), median(new_deaths_smoothed_per_million, na.rm = TRUE), new_deaths_smoothed_per_million),
     #     positive_rate = ifelse(is.na(positive_rate), median(positive_rate, na.rm = TRUE), positive_rate)
     #   )
-
+    
     clean_data <- filtered_data %>%
       group_by(location) %>%
       fill(total_vaccinations_per_hundred, new_deaths_smoothed_per_million, positive_rate, .direction = "down") %>%
       ungroup()
-
+    
     output$animatedPlot <- renderPlotly({
       # Assuming 'data' is defined elsewhere and properly formatted
       data <- data.frame(clean_data)
-
+      
       # First plot (top)
       p1 <- plot_ly(data,
                     x = ~total_vaccinations_per_hundred,
@@ -446,9 +446,9 @@ server <- function(input, output) {
                     )) %>%
         layout(
           xaxis = list(title = "", showticklabels = TRUE),  # Hide x-axis title but show tick labels
-          yaxis = list(title = "New Deaths per Million", range = c(-5, 25.0)),
+          yaxis = list(title = "New Deaths per Million", range = c(-5, 20.0)),
           margin = list(b = 10, t = 100))  # Adjust top margin to show title
-
+      
       # Second plot (bottom)
       p2 <- plot_ly(data,
                     x = ~total_vaccinations_per_hundred,
@@ -471,38 +471,38 @@ server <- function(input, output) {
                     )) %>%
         layout(
           xaxis = list(title = "Vaccination per Hundred"),  # Only the last plot keeps the x-axis title
-          yaxis = list(title = "Positivity Rate (%)", range = c(-0.05, 0.40)),
+          yaxis = list(title = "Positivity Rate (%)", range = c(-0.05, 0.60)),
           margin = list(t = 30))  # Adjust top margin
-
+      
       # Combine both plots into a single subplot layout
       subplot(p1, p2, nrows = 2, shareX = TRUE, titleX = TRUE, titleY = TRUE, margin = 0.05) %>%
         layout(showlegend = TRUE) %>%
         animation_opts(frame = 0.01, redraw = TRUE) %>%
         animation_slider(currentvalue = list(prefix = "Date: "), hide = FALSE)
     })
-
+    
   })
-
+  
   observeEvent(input$submit, {
     req(input$metric, input$start_date, input$end_date)
-
+    
     selected_locations <- sapply(1:length(locations$list), function(i) {
       input[[paste0("location", i)]]
     })
-
+    
     # Convert selected country names to ISO codes using the mapping
     selected_iso_codes <- sapply(selected_locations, function(location) {
       # Assuming country_to_iso is a named vector where names are countries and values are ISO codes
       country_to_iso[location]
     }, USE.NAMES = FALSE)
-
+    
     metric <- input$metric
     start_date <- input$start_date
     end_date <- input$end_date
-
+    
     # Initialize an empty data frame for filtered data
     filtered_data <- data.frame()
-
+    
     if (metric == "New Cases") {
       y_metric <- "new_cases"
     } else if (metric == "New Deaths") {
@@ -530,8 +530,8 @@ server <- function(input, output) {
     }else if (metric == "New Test Per Thousand") {
       y_metric <- "new_tests_per_thousand"
     }
-
-
+    
+    
     # Loop through selected locations to filter data and combine
     for (location in selected_locations) {
       location_data <- plotting_data[plotting_data$location == location & plotting_data$date >= start_date & plotting_data$date <= end_date, ]
@@ -571,7 +571,7 @@ server <- function(input, output) {
       }
       filtered_data <- rbind(filtered_data, location_data)
     }
-
+    
     # Plot the data
     output$cases_plot <- renderPlot({
       ggplot(filtered_data, aes(x = date, y = get(y_metric), color = location)) +
@@ -588,19 +588,19 @@ server <- function(input, output) {
               legend.title = element_text(size = 12, face = "bold"),  # Bold and larger legend title
               legend.text = element_text(size = 12, face = "bold"))  # Bold and larger legend text
     })
-
+    
     output$world_map <- renderLeaflet({
       countries_sf <- ne_countries(scale = "medium", returnclass = "sf")
-
+      
       map <- leaflet() %>%
         addProviderTiles(providers$CartoDB.Positron) %>%
         setView(lat = 0, lng = 0, zoom = 2) # Default view
-
+      
       # Ensure at least one country is selected before attempting to filter and highlight
       if (length(selected_iso_codes) > 0) {
         filtered_countries_sf <- countries_sf %>%
           filter(iso_a3 %in% selected_iso_codes)
-
+        
         map <- map %>%
           addPolygons(data = filtered_countries_sf,
                       fillColor = "#ff7800", weight = 1,
@@ -610,40 +610,40 @@ server <- function(input, output) {
                                                           fillOpacity = 0.9,
                                                           bringToFront = TRUE))
       }
-
+      
       map
     })
-
+    
   })
-
+  
   output$heatmap_plot <- renderPlot({
     # Filter data for the specified date
     date_filtered_data <- plotting_data %>% filter(date == as.Date(input$date))
-
+    
     # Check if data is available for the selected date
     if (nrow(date_filtered_data) == 0) {
       return(NULL)  # Return NULL if no data is available
     }
-
+    
     # Select the columns of interest for rows and columns in the heatmap
     row_variables <- date_filtered_data %>%
       select(total_deaths_per_million, total_cases_per_million,
              weekly_icu_admissions_per_million, weekly_hosp_admissions_per_million, cardiovasc_death_rate, excess_mortality_cumulative_per_million)
-
+    
     col_variables <- date_filtered_data %>%
       select(people_fully_vaccinated_per_hundred, people_vaccinated_per_hundred,
              total_boosters_per_hundred, population_density,
              median_age, aged_65_older, aged_70_older, gdp_per_capita, extreme_poverty, diabetes_prevalence, female_smokers, male_smokers, life_expectancy,
              human_development_index)
-
+    
     # Compute Pearson's correlation
     correlation_matrix <- cor(row_variables, col_variables, use = "pairwise.complete.obs", method = "pearson")
-
+    
     # Convert the correlation matrix to a format suitable for ggplot2
     correlation_data <- as.data.frame(as.table(correlation_matrix))
-
+    
     names(correlation_data) <- c("RowVariable", "ColVariable", "Correlation")
-
+    
     # Generate the heatmap with adjusted theme settings for better visibility
     heatmap_plot <- ggplot(correlation_data, aes(x = RowVariable, y = ColVariable, fill = Correlation)) +
       geom_tile() +
@@ -658,42 +658,42 @@ server <- function(input, output) {
             legend.title = element_text(size = 12, face = "bold"),
             legend.text = element_text(size = 12, face = "bold")) +
       labs(title = paste("Pearson's Correlation Heatmap on", input$date), x = "", y = "")
-
+    
     print(heatmap_plot)
   }, width = 1200, height = 800, res = 96)  # Adjust width and height as needed
-
-
+  
+  
   predict_deaths <- eventReactive(input$predict_button, {
     req(input$total_cases, input$country)
-
+    
     total_cases <- input$total_cases
-
+    
     # Fit a simple linear regression model
     model <- lm(total_deaths ~ total_cases, data = subset(dw, location == input$country))
-
+    
     # Check if the model fitting was successful
     if (length(model$coefficients) == 0) {
       return(list(predicted_deaths = "Model fitting failed", model_summary = ""))
     }
-
+    
     # Get model summary
     model_summary <- summary(model)
-
+    
     # Predict deaths based on input total cases
     predicted_deaths <- predict(model, newdata = data.frame(total_cases = total_cases))
-
+    
     # Return predicted deaths and model summary
     return(list(predicted_deaths = round(predicted_deaths, 2), model_summary = model_summary))
   })
-
+  
   output$prediction <- renderText({
     predict_deaths()$predicted_deaths
   })
-
+  
   output$model_summary <- renderPrint({
     predict_deaths()$model_summary
   })
-
+  
   output$data_plot <- renderPlot({
     ggplot(subset(dw, location == input$country), aes(x = total_cases, y = total_deaths)) +
       geom_point() +
@@ -702,7 +702,7 @@ server <- function(input, output) {
       theme_minimal() +
       theme(plot.title = element_text(hjust = 0.5))  # Center plot title
   })
-
+  
   output$time_series_plot <- renderPlot({
     filtered_data <- dw %>%
       filter(location == input$country) %>%
@@ -710,14 +710,14 @@ server <- function(input, output) {
       group_by(date) %>%
       summarise(total_cases = sum(total_cases)) %>%
       na.omit()  # Remove NA values if any
-
+    
     ggplot(filtered_data, aes(x = date, y = total_cases)) +
       geom_line() +
       labs(title = "Time Series Plot of Total Cases", x = "Date", y = "Total Cases") +
       theme_minimal() +
       theme(plot.title = element_text(hjust = 0.5))  # Center plot title
   })
-
+  
 }
 # Run the application
 shinyApp(ui, server)
